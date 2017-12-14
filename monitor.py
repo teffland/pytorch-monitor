@@ -17,6 +17,14 @@ from tensorboardX import SummaryWriter
 # SYMMETRIC_LOGSCALE_BINS = [-1e15, -1e5, -1e4, -1e3, -1e2, -1e1, -1e-1, -1e-2, -1e-3, -1e-4,
 #       1e-4, 1e-3, 1e-2, 1e-1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e15]
 
+def grad_hook(module, name, writer):
+    def hook(grad):
+        writer.add_histogram('{}/grad'.format(name.replace('.','/')),
+                             grad.data,
+                             module.global_step-1,
+                             bins=bins)
+    return hook
+
 def monitor_module(module, summary_writer,
                    track_data=True,
                    track_grad=True,
@@ -40,17 +48,17 @@ def monitor_module(module, summary_writer,
         # workaround for getting var names correctly when registering
         # backprop hooks on intermediate variables because for some
         # reason the hook function seems to be shared among the vars...
-        varnames_backward = []
-        varname_i = 0
-        def var_grad_hook(grad):
-            nonlocal varname_i # prevent name_i from becoming local in closure
-            name = varnames_backward[varname_i]
-#             print('Backward var:', module.global_step, name, grad.data.shape)
-            summary_writer.add_histogram('{}/grad'.format(name.replace('.','/')),
-                                         grad.data,
-                                         module.global_step-1,
-                                         bins=bins)
-            varname_i += 1
+#         varnames_backward = []
+#         varname_i = 0
+#         def var_grad_hook(grad):
+#             nonlocal varname_i # prevent name_i from becoming local in closure
+#             name = varnames_backward[varname_i]
+# #             print('Backward var:', module.global_step, name, grad.data.shape)
+#             summary_writer.add_histogram('{}/grad'.format(name.replace('.','/')),
+#                                          grad.data,
+#                                          module.global_step-1,
+#                                          bins=bins)
+#             varname_i += 1
 
         # iterate over the state after the forward pass
         # registering backprop hooks on intermediate variables
@@ -60,10 +68,9 @@ def monitor_module(module, summary_writer,
         # and the updates from the last iteration if possible
         for name, tensor in module.state_dict().items():
             if isinstance(tensor, ag.Variable): # it's an intermediate computation
-#                 print('Forward var:', module.global_step, name, tensor.data.shape)
                 varnames_backward.insert(0, name)
                 if track_grad:
-                    tensor.register_hook(var_grad_hook)
+                    tensor.register_hook(grad_hook(module, summary_writer, name))
                 if track_data:
                     summary_writer.add_histogram('{}/data'.format(name.replace('.','/')),
                                                  tensor.data,
@@ -71,7 +78,6 @@ def monitor_module(module, summary_writer,
                                                  bins=bins)
 
             else: # it's a param tensor
-#                 print('Forward param:', module.global_step, name, tensor.shape)
                 if track_data:
                     summary_writer.add_histogram('{}/data'.format(name.replace('.','/')),
                                                  tensor,
@@ -103,20 +109,21 @@ def monitor_module(module, summary_writer,
     # backprop hooks on parameters because for some
     # reason the hook function seems to be shared among them...
     param_names = [ name for name, _ in module.named_parameters()]
-    param_names_backward = param_names[::-1]
-    paramname_i = 0
-    def param_grad_hook(grad):
-        nonlocal paramname_i # prevent name_i from becoming local in closure
-        name = param_names_backward[paramname_i]
-#         print('Backward param:', module.global_step, name, grad.data.shape)
-        summary_writer.add_histogram('{}/grad'.format(name.replace('.','/')),
-                                     grad.data,
-                                     module.global_step-1,
-                                     bins=bins)
-        paramname_i = (paramname_i + 1) % len(param_names_backward)
+    # param_names_backward = param_names[::-1]
+    # paramname_i = 0
+
+#     def param_grad_hook(grad):
+#         nonlocal paramname_i # prevent name_i from becoming local in closure
+#         name = param_names_backward[paramname_i]
+# #         print('Backward param:', module.global_step, name, grad.data.shape)
+#         summary_writer.add_histogram('{}/grad'.format(name.replace('.','/')),
+#                                      grad.data,
+#                                      module.global_step-1,
+#                                      bins=bins)
+#         paramname_i = (paramname_i + 1) % len(param_names_backward)
     if track_grad:
         for name, param in zip(param_names, module.parameters()):
-            param.register_hook(param_grad_hook)
+            param.register_hook(grad_hook(module, summary_writer, name))
 
     module.register_forward_hook(monitor_forward)
 
