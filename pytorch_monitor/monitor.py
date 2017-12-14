@@ -9,8 +9,6 @@ import torch.autograd as ag
 from torchvision.utils import make_grid
 import torchvision.transforms as transforms
 
-import numpy as np
-import matplotlib.pyplot as plt
 from tensorboardX import SummaryWriter
 
 
@@ -126,17 +124,6 @@ def monitor_module(module, summary_writer,
             param.register_hook(grad_hook(module, summary_writer, name))
 
     module.register_forward_hook(monitor_forward)
-
-def fig2img(fig, dpi=None, closefig=True):
-    if dpi is not None:
-        fig.set_dpi(dpi)
-    fig.canvas.draw()
-    # Now we can save it to a numpy array.
-    data = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep='')
-    data = data.reshape(fig.canvas.get_width_height()[::-1] + (3,))
-    if closefig:
-        plt.close(fig)
-    return data
 
 def commit(experiment_name, time):
     try:
