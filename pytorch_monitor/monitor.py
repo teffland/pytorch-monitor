@@ -164,4 +164,4 @@ def init_experiment(config):
         torch.manual_seed(rseed)
 
     writer.add_text(config['tag'], text, 0)
-    return writer
+    return writer, config
