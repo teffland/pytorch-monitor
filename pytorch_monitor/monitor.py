@@ -124,7 +124,8 @@ def init_experiment(config):
     run_comment = config.get('run_comment', None)
     if run_comment:
         run_name += '-{}'.format(run_comment)
-
+    config['run_name'] = run_name
+    
     log_dir = config.get('log_dir', 'runs')
     if not os.path.exists(log_dir):
         os.mkdir(log_dir)
