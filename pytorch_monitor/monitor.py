@@ -11,7 +11,6 @@ import torchvision.transforms as transforms
 
 from tensorboardX import SummaryWriter
 
-
 def grad_hook(module, name, writer, bins):
     def hook(grad):
         writer.add_histogram('{}/grad'.format(name.replace('.','/')),
@@ -128,10 +127,10 @@ def init_experiment(config):
     
     log_dir = config.get('log_dir', 'runs')
     if not os.path.exists(log_dir):
-        os.mkdir(log_dir)
+        os.makedirs(log_dir)
     run_dir = os.path.join(log_dir, run_name)
     if not os.path.exists(run_dir):
-        os.mkdir(run_dir)
+        os.makedirs(run_dir)
     config['run_dir'] = run_dir
 
     writer = SummaryWriter(run_dir)
