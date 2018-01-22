@@ -125,6 +125,7 @@ def init_experiment(config):
         run_name += '-{}'.format(run_comment)
     config['run_name'] = run_name
     
+    # create the needed run directory ifnexists
     log_dir = config.get('log_dir', 'runs')
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
@@ -135,6 +136,7 @@ def init_experiment(config):
 
     writer = SummaryWriter(run_dir)
 
+    # create text summary for logging config to tensorboard
     config['tag'] = 'Experiment Config: {} :: {}\n'.format(
         config.get('title', '<No Title>'), start_time)
 
@@ -158,10 +160,16 @@ def init_experiment(config):
         text += '{}: {}\n'.format(key, val)
     text += '</pre>'
 
+    # set random seed
     rseed = config.get('random_seed', None)
     if rseed:
         random.seed(rseed)
         torch.manual_seed(rseed)
 
     writer.add_text(config['tag'], text, 0)
+    
+    # save the config to run dir
+    with open(os.path.join(config['run_dir'], 'config.json'), 'w') as f:
+        json.dumps(config, f, indent=2)
+        
     return writer, config
