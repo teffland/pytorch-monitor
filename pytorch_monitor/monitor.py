@@ -173,6 +173,6 @@ def init_experiment(config):
     
     # save the config to run dir
     with open(os.path.join(config['run_dir'], 'config.json'), 'w') as f:
-        json.dumps(config, f, indent=2)
+        json.dump(config, f, indent=2)
         
     return writer, config
