@@ -119,7 +119,9 @@ def commit(experiment_name, time):
 def init_experiment(config):
     start_time = datetime.datetime.now().strftime('%b-%d-%y@%X')
     host_name = socket.gethostname()
-    run_name = config.get('run_name', '{}-{}'.format(start_time, host_name))
+    run_name = config.get('run_name', None)
+    if run_name is None:
+        run_name = '{}-{}'.format(start_time, host_name)
     run_comment = config.get('run_comment', None)
     if run_comment:
         run_name += '-{}'.format(run_comment)
