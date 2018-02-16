@@ -99,8 +99,9 @@ def monitor_module(module, summary_writer,
     if track_grad:
         param_names = [ name for name, _ in module.named_parameters()]
         for name, param in zip(param_names, module.parameters()):
-            hook = grad_hook(module, name, summary_writer, bins)
-            module.param_hooks[name] = param.register_hook(hook)
+            if param.requires_grad:
+                hook = grad_hook(module, name, summary_writer, bins)
+                module.param_hooks[name] = param.register_hook(hook)
             
     # monitor forward grads
     module.register_forward_pre_hook(remove_old_var_hooks)
