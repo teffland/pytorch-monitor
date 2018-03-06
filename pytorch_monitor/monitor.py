@@ -4,6 +4,7 @@ import sh
 import os
 import random
 import json
+import numpy.random as npr
 
 import torch
 import torch.autograd as ag
@@ -166,8 +167,9 @@ def init_experiment(config):
 
     # set random seed
     rseed = config.get('random_seed', None)
-    if rseed:
+    if rseed is not None:
         random.seed(rseed)
+        npr.seed(rseed)
         torch.manual_seed(rseed)
 
     writer.add_text(config['tag'], text, 0)
