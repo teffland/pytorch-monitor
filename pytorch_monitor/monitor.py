@@ -64,7 +64,7 @@ def set_remove_param_grad_hooks(module):
     def remove_param_grad_hooks():
         """ Remove gradient hooks to all of the parameters. """
         for name in module.param_hooks:
-            del module.param_hooks[name]
+            module.param_hooks.pop(name)
     module.remove_param_grad_hooks = remove_param_grad_hooks
     
 def remove_old_var_hooks(module, input):
@@ -112,12 +112,13 @@ def get_monitor_forward_and_var_backward(summary_writer, bins):
         for prefix, mod in module.named_modules():
             for tensor_name, entry in mod.monitored_vars.items():
                 name = '{}/{}'.format(prefix, tensor_name) if prefix else tensor_name
-                if entry['track_grad']:
+                tensor = entry['tensor']
+                if entry['track_grad'] and tensor.requires_grad:
                     hook = grad_hook(module, name, summary_writer, bins)
-                    module.var_hooks[name] = entry['tensor'].register_hook(hook)
+                    module.var_hooks[name] = tensor.register_hook(hook)
                 if entry['track_data']:
                     summary_writer.add_histogram('{}/data'.format(name.replace('.','/')),
-                                                 entry['tensor'].data,
+                                                 tensor.data,
                                                  module.global_step,
                                                  bins=bins)
         # Update step
