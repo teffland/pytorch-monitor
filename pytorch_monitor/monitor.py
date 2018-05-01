@@ -94,6 +94,7 @@ def get_monitor_forward_and_backward(summary_writer, bins):
                 for tensor_name, entry in mod.monitored_vars.items():
                     name = '{}/{}'.format(prefix, tensor_name) if prefix else tensor_name
                     tensor = entry['tensor']
+                    print(name, entry)
                     if entry['track_grad'] and tensor.requires_grad:
                         hook = grad_hook(module, name, summary_writer, bins)
                         module.var_hooks[name] = tensor.register_hook(hook)
