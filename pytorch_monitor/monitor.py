@@ -37,14 +37,13 @@ def set_monitoring(module):
 def grad_hook(module, name, writer, bins):
     """ Factory for grad_hook closures """
     def hook(grad):
-        print('{} hook'.format(name))
         writer.add_histogram('{}/grad'.format(name.replace('.','/')),
                              grad.data,
                              module.global_step-1,
                              bins=bins)
     return hook
 
-def remove_grad_hooks(module, grad_input, grad_output):
+def remove_grad_hooks(module, input):
     """ Remove gradient hooks to all of the parameters and monitored vars """
     for hook in list(module.param_hooks.keys()):
         module.param_hooks[hook].remove()
@@ -95,7 +94,6 @@ def get_monitor_forward_and_backward(summary_writer, bins):
                 for tensor_name, entry in mod.monitored_vars.items():
                     name = '{}/{}'.format(prefix, tensor_name) if prefix else tensor_name
                     tensor = entry['tensor']
-                    #print(name, entry)
                     if entry['track_grad'] and tensor.requires_grad:
                         hook = grad_hook(module, name, summary_writer, bins)
                         module.var_hooks[name] = tensor.register_hook(hook)
@@ -160,3 +158,4 @@ def monitor_module(module, summary_writer,
     module.register_forward_pre_hook(remove_grad_hooks)
     monitor_forward_and_backward = get_monitor_forward_and_backward(summary_writer, bins)
     module.register_forward_hook(monitor_forward_and_backward)
+    #module.register_backward_hook(remove_grad_hooks)
