@@ -85,45 +85,46 @@ def get_monitor_forward_and_var_backward(summary_writer, bins):
         and set their grad_hooks
         """
         # Parameters
-        print('fb ', end='')
-        param_names = [ name for name, _ in module.named_parameters()]
-        for name, param in zip(param_names, module.parameters()):
-            if module.track_data:
-                summary_writer.add_histogram('{}/data'.format(name.replace('.','/')),
-                                             param,
-                                             module.global_step,
-                                             bins=bins)
-            if name in module.last_state_dict:
-                if module.track_update:
-                    update = param - module.last_state_dict[name]
-                    summary_writer.add_histogram('{}/update-val'.format(name.replace('.','/')),
-                                                 update,
-                                                 module.global_step-1,
-                                                 bins=bins)
-                if module.track_update and module.track_update_ratio:
-                    update_ratio = update / (module.last_state_dict[name]+1e-15)
-
-                    summary_writer.add_histogram('{}/update-ratio'.format(name.replace('.','/')),
-                                                 update_ratio,
-                                                 module.global_step-1,
-                                                 bins=bins)
-            if module.track_update:
-                module.last_state_dict[name] = param.clone()
-        
-        # Intermediate Vars
-        for prefix, mod in module.named_modules():
-            for tensor_name, entry in mod.monitored_vars.items():
-                name = '{}/{}'.format(prefix, tensor_name) if prefix else tensor_name
-                tensor = entry['tensor']
-                if entry['track_grad'] and tensor.requires_grad:
-                    hook = grad_hook(module, name, summary_writer, bins)
-                    module.var_hooks[name] = tensor.register_hook(hook)
-                if entry['track_data']:
+        if module.is_monitoring:
+            print('fb ', end='')
+            param_names = [ name for name, _ in module.named_parameters()]
+            for name, param in zip(param_names, module.parameters()):
+                if module.track_data:
                     summary_writer.add_histogram('{}/data'.format(name.replace('.','/')),
-                                                 tensor.data,
+                                                 param,
                                                  module.global_step,
                                                  bins=bins)
-        # Update step
+                if name in module.last_state_dict:
+                    if module.track_update:
+                        update = param - module.last_state_dict[name]
+                        summary_writer.add_histogram('{}/update-val'.format(name.replace('.','/')),
+                                                     update,
+                                                     module.global_step-1,
+                                                     bins=bins)
+                    if module.track_update and module.track_update_ratio:
+                        update_ratio = update / (module.last_state_dict[name]+1e-15)
+
+                        summary_writer.add_histogram('{}/update-ratio'.format(name.replace('.','/')),
+                                                     update_ratio,
+                                                     module.global_step-1,
+                                                     bins=bins)
+                if module.track_update:
+                    module.last_state_dict[name] = param.clone()
+
+            # Intermediate Vars
+            for prefix, mod in module.named_modules():
+                for tensor_name, entry in mod.monitored_vars.items():
+                    name = '{}/{}'.format(prefix, tensor_name) if prefix else tensor_name
+                    tensor = entry['tensor']
+                    if entry['track_grad'] and tensor.requires_grad:
+                        hook = grad_hook(module, name, summary_writer, bins)
+                        module.var_hooks[name] = tensor.register_hook(hook)
+                    if entry['track_data']:
+                        summary_writer.add_histogram('{}/data'.format(name.replace('.','/')),
+                                                     tensor.data,
+                                                     module.global_step,
+                                                     bins=bins)
+            # Update step
         module.global_step += 1
     return monitor_forward_and_backward
     
