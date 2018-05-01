@@ -64,6 +64,7 @@ def set_remove_param_grad_hooks(module):
     def remove_param_grad_hooks():
         """ Remove gradient hooks to all of the parameters. """
         for hook in list(module.param_hooks.keys()):
+            print('r {}'.format(hook))
             module.param_hooks[hook].remove()
             module.param_hooks.pop(hook)
     module.remove_param_grad_hooks = remove_param_grad_hooks
