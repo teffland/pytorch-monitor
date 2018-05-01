@@ -85,6 +85,7 @@ def get_monitor_forward_and_var_backward(summary_writer, bins):
         and set their grad_hooks
         """
         # Parameters
+        print('fb ', end='')
         param_names = [ name for name, _ in module.named_parameters()]
         for name, param in zip(param_names, module.parameters()):
             if module.track_data:
