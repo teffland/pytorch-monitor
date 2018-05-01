@@ -42,8 +42,8 @@ def set_monitoring(module):
             module.track_grad = track_grad if track_grad is not None else module.track_grad
             module.track_update = track_update if track_update is not None else module.track_update
             module.track_update_ratio = track_update_ratio if track_update_ratio is not None else module.track_update_ratio
-            if module.track_grad:
-                module.add_param_grad_hooks()
+            #if module.track_grad:
+            #    module.add_param_grad_hooks()
         else:
             module.remove_param_grad_hooks()
     module.monitoring = monitoring
