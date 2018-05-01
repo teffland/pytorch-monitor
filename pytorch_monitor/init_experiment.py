@@ -2,9 +2,11 @@ import socket
 import datetime
 import sh
 import os
-import random
 import json
+
+import random
 import numpy.random as npr
+import torch
 
 from tensorboardX import SummaryWriter
 
