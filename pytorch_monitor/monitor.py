@@ -133,10 +133,6 @@ def monitor_module(module, summary_writer,
     module.track_update_ratio = track_update_ratio
     if not hasattr(module, 'global_step'):
         module.global_step = 0
-    if not hasattr(module, 'global_step'):
-        module.global_step = 0
-    if not hasattr(module, 'global_step'):
-        module.global_step = 0
     if not hasattr(module, 'is_monitoring'):
         module.is_monitoring = True
     if not hasattr(module, 'monitoring'):
