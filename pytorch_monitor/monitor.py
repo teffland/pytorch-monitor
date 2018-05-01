@@ -151,11 +151,11 @@ def monitor_module(module, summary_writer,
         if not hasattr(mod, 'monitored_vars'):
             mod.monitored_vars = dict()
         
-    # monitor the backward grads for params
     module.monitoring(True)
     
-    # monitor forward grads
+    # remove previous grad hooks before handles go stale
     module.register_forward_pre_hook(remove_grad_hooks)
+    
+    # set forward hook that monitors forward activations and sets new grad hooks
     monitor_forward_and_backward = get_monitor_forward_and_backward(summary_writer, bins)
     module.register_forward_hook(monitor_forward_and_backward)
-    #module.register_backward_hook(remove_grad_hooks)
