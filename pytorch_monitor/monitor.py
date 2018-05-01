@@ -1,14 +1,5 @@
 from tensorboardX import SummaryWriter
 
-def grad_hook(module, name, writer, bins):
-    """ Factory for grad_hook closures """
-    def hook(grad):
-        writer.add_histogram('{}/grad'.format(name.replace('.','/')),
-                             grad.data,
-                             module.global_step-1,
-                             bins=bins)
-    return hook
-
 def set_monitor(module):
     """ Defines the monitor method on the module. """
     def monitor(name, tensor, 
@@ -37,51 +28,26 @@ def set_monitoring(module):
         are not None, they will be overwritten.
         """
         module.is_monitoring = is_monitoring
-        if is_monitoring:
-            module.track_data = track_data if track_data is not None else module.track_data
-            module.track_grad = track_grad if track_grad is not None else module.track_grad
-            module.track_update = track_update if track_update is not None else module.track_update
-            module.track_update_ratio = track_update_ratio if track_update_ratio is not None else module.track_update_ratio
-            #if module.track_grad:
-            #    module.add_param_grad_hooks()
-        #else:
-        #    module.remove_param_grad_hooks()
+        module.track_data = track_data if track_data is not None else module.track_data
+        module.track_grad = track_grad if track_grad is not None else module.track_grad
+        module.track_update = track_update if track_update is not None else module.track_update
+        module.track_update_ratio = track_update_ratio if track_update_ratio is not None else module.track_update_ratio
     module.monitoring = monitoring
     
-def get_add_param_grad_hooks(module, summary_writer, bins):
-    """ Set the add_param_grad_hooks method on the module """
-    def add_param_grad_hooks():
-        """ Add gradient hooks to all of the parameters. """
-        param_names = [ name for name, _ in module.named_parameters()]
-        for name, param in zip(param_names, module.parameters()):
-            if param.requires_grad:
-                hook = grad_hook(module, name, summary_writer, bins)
-                module.param_hooks[name] = param.register_hook(hook)
-    module.add_param_grad_hooks = add_param_grad_hooks
-    
-# def get_remove_param_grad_hooks(module):
-#     """ Set the remove_param_grad_hooks method on the module """
-#     def remove_param_grad_hooks(module, grad_input, grad_output):
-#         """ Remove gradient hooks to all of the parameters. """
-#         for hook in list(module.param_hooks.keys()):
-#             print('r {}'.format(hook))
-#             module.param_hooks[hook].remove()
-#             module.param_hooks.pop(hook)
-#     return remove_param_grad_hooks
+def grad_hook(module, name, writer, bins):
+    """ Factory for grad_hook closures """
+    def hook(grad):
+        writer.add_histogram('{}/grad'.format(name.replace('.','/')),
+                             grad.data,
+                             module.global_step-1,
+                             bins=bins)
+    return hook
 
 def remove_grad_hooks(module, grad_input, grad_output):
-    """ Remove gradient hooks to all of the parameters. """
+    """ Remove gradient hooks to all of the parameters and monitored vars """
     for hook in list(module.param_hooks.keys()):
         module.param_hooks[hook].remove()
         module.param_hooks.pop(hook)
-    for hook in list(module.var_hooks.keys()):
-        module.var_hooks[hook].remove()
-        module.var_hooks.pop(hook)
-    
-def remove_old_var_hooks(module, input):
-    """ Removes all old registered intermeditate variable hooks from the module
-    before applying them on the forward pass, so stale closures don't happen.
-    """
     for hook in list(module.var_hooks.keys()):
         module.var_hooks[hook].remove()
         module.var_hooks.pop(hook)
@@ -99,8 +65,8 @@ def get_monitor_forward_and_backward(summary_writer, bins):
             param_names = [ name for name, _ in module.named_parameters()]
             for name, param in zip(param_names, module.parameters()):
                 if module.track_grad and param.requires_grad:
-                        hook = grad_hook(module, name, summary_writer, bins)
-                        module.param_hooks[name] = param.register_hook(hook)
+                    hook = grad_hook(module, name, summary_writer, bins)
+                    module.param_hooks[name] = param.register_hook(hook)
                 if module.track_data:
                     summary_writer.add_histogram('{}/data'.format(name.replace('.','/')),
                                                  param,
@@ -171,10 +137,6 @@ def monitor_module(module, summary_writer,
         module.global_step = 0
     if not hasattr(module, 'global_step'):
         module.global_step = 0
-    #if not hasattr(module, 'add_param_grad_hooks'):
-    #    set_add_param_grad_hooks(module, summary_writer, bins)
-    #if not hasattr(module, 'remove_param_grad_hooks'):
-    #    set_remove_param_grad_hooks(module)
     if not hasattr(module, 'is_monitoring'):
         module.is_monitoring = True
     if not hasattr(module, 'monitoring'):
@@ -197,7 +159,6 @@ def monitor_module(module, summary_writer,
     module.monitoring(True)
     
     # monitor forward grads
-    #module.register_forward_pre_hook(remove_old_var_hooks)
     monitor_forward_and_backward = get_monitor_forward_and_backward(summary_writer, bins)
     module.register_forward_hook(monitor_forward_and_backward)
     module.register_backward_hook(remove_grad_hooks)
