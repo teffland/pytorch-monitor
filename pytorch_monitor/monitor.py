@@ -69,12 +69,14 @@ def get_add_param_grad_hooks(module, summary_writer, bins):
 #             module.param_hooks.pop(hook)
 #     return remove_param_grad_hooks
 
-def remove_param_grad_hooks(module, grad_input, grad_output):
+def remove_grad_hooks(module, grad_input, grad_output):
     """ Remove gradient hooks to all of the parameters. """
     for hook in list(module.param_hooks.keys()):
-        print('r {}'.format(hook))
         module.param_hooks[hook].remove()
         module.param_hooks.pop(hook)
+    for hook in list(module.var_hooks.keys()):
+        module.var_hooks[hook].remove()
+        module.var_hooks.pop(hook)
     
 def remove_old_var_hooks(module, input):
     """ Removes all old registered intermeditate variable hooks from the module
@@ -94,7 +96,6 @@ def get_monitor_forward_and_backward(summary_writer, bins):
         """
         # Parameters
         if module.is_monitoring:
-            print('fb ', end='')
             param_names = [ name for name, _ in module.named_parameters()]
             for name, param in zip(param_names, module.parameters()):
                 if module.track_grad and param.requires_grad:
@@ -196,7 +197,7 @@ def monitor_module(module, summary_writer,
     module.monitoring(True)
     
     # monitor forward grads
-    module.register_forward_pre_hook(remove_old_var_hooks)
+    #module.register_forward_pre_hook(remove_old_var_hooks)
     monitor_forward_and_backward = get_monitor_forward_and_backward(summary_writer, bins)
     module.register_forward_hook(monitor_forward_and_backward)
-    module.register_backward_hook(remove_param_grad_hooks)
+    module.register_backward_hook(remove_grad_hooks)
