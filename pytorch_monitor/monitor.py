@@ -3,7 +3,6 @@ from tensorboardX import SummaryWriter
 def grad_hook(module, name, writer, bins):
     """ Factory for grad_hook closures """
     def hook(grad):
-        print('{} grad hook'.format(name))
         writer.add_histogram('{}/grad'.format(name.replace('.','/')),
                              grad.data,
                              module.global_step-1,
@@ -72,7 +71,6 @@ def remove_old_var_hooks(module, input):
     """ Removes all old registered intermeditate variable hooks from the module
     before applying them on the forward pass, so stale closures don't happen.
     """
-    print('dropping hooks')
     for hook in list(module.var_hooks.keys()):
         module.var_hooks[hook].remove()
         module.var_hooks.pop(hook)
@@ -88,7 +86,6 @@ def get_monitor_forward_and_var_backward(summary_writer, bins):
         # Parameters
         param_names = [ name for name, _ in module.named_parameters()]
         for name, param in zip(param_names, module.parameters()):
-            print('monitoring param {}'.format(name))
             if module.track_data:
                 summary_writer.add_histogram('{}/data'.format(name.replace('.','/')),
                                              param,
@@ -116,7 +113,6 @@ def get_monitor_forward_and_var_backward(summary_writer, bins):
         for prefix, mod in module.named_modules():
             for tensor_name, entry in mod.monitored_vars.items():
                 name = '{}/{}'.format(prefix, tensor_name) if prefix else tensor_name
-                print('monitoring var {}'.format(name))
                 if entry['track_grad']:
                     hook = grad_hook(module, name, summary_writer, bins)
                     module.var_hooks[name] = entry['tensor'].register_hook(hook)
