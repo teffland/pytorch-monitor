@@ -93,7 +93,6 @@ def get_monitor_forward_and_var_backward(summary_writer, bins):
                                              bins=bins)
             if name in module.last_state_dict:
                 if module.track_update:
-                    print('  track update')
                     update = param - module.last_state_dict[name]
                     summary_writer.add_histogram('{}/update-val'.format(name.replace('.','/')),
                                                  update,
