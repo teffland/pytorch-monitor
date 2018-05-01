@@ -13,6 +13,7 @@ setup(
   license='MIT',
   install_requires = [
     'sh',
-    'tensorboardX'
+    'tensorboardX',
+    'tensorflow==1.6'
   ]
 )

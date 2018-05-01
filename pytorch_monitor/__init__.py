@@ -1,1 +1,2 @@
-from pytorch_monitor.monitor import init_experiment, monitor_module
+from pytorch_monitor.init_experiment import init_experiment
+from pytorch_monitor.monitor import monitor_module
