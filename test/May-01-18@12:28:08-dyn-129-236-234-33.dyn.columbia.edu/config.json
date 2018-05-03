@@ -1,0 +1,8 @@
+{
+  "title": "Test Monitor",
+  "log_dir": "test",
+  "random_seed": 42,
+  "run_name": "May-01-18@12:28:08-dyn-129-236-234-33.dyn.columbia.edu",
+  "run_dir": "test/May-01-18@12:28:08-dyn-129-236-234-33.dyn.columbia.edu",
+  "tag": "Experiment Config: Test Monitor :: May-01-18@12:28:08\n"
+}
