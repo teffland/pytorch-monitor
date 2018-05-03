@@ -38,7 +38,7 @@ def grad_hook(module, name, writer, bins):
     """ Factory for grad_hook closures """
     def hook(grad):
         writer.add_histogram('{}/grad'.format(name.replace('.','/')),
-                             grad.data,
+                             grad.detach().cpu().numpy(),
                              module.global_step-1,
                              bins=bins)
     return hook
@@ -69,21 +69,21 @@ def get_monitor_forward_and_backward(summary_writer, bins):
                     module.param_hooks[name] = param.register_hook(hook)
                 if module.track_data:
                     summary_writer.add_histogram('{}/data'.format(name.replace('.','/')),
-                                                 param,
+                                                 param.detach().cpu().numpy(),
                                                  module.global_step,
                                                  bins=bins)
                 if name in module.last_state_dict:
                     if module.track_update:
                         update = param - module.last_state_dict[name]
                         summary_writer.add_histogram('{}/update-val'.format(name.replace('.','/')),
-                                                     update,
+                                                     update.detach().cpu().numpy(),
                                                      module.global_step-1,
                                                      bins=bins)
                     if module.track_update and module.track_update_ratio:
                         update_ratio = update / (module.last_state_dict[name]+1e-15)
 
                         summary_writer.add_histogram('{}/update-ratio'.format(name.replace('.','/')),
-                                                     update_ratio,
+                                                     update_ratio.detach().cpu().numpy(),
                                                      module.global_step-1,
                                                      bins=bins)
                 if module.track_update:
@@ -99,7 +99,7 @@ def get_monitor_forward_and_backward(summary_writer, bins):
                         module.var_hooks[name] = tensor.register_hook(hook)
                     if entry['track_data']:
                         summary_writer.add_histogram('{}/data'.format(name.replace('.','/')),
-                                                     tensor.data,
+                                                     tensor.detach().cpu().numpy(),
                                                      module.global_step,
                                                      bins=bins)
             # Update step
