@@ -11,8 +11,8 @@ import torch
 from tensorboardX import SummaryWriter
 
 def commit(experiment_name, time):
-    """ 
-    Try to commit repo exactly as it is when starting the experiment for reproducibility. 
+    """
+    Try to commit repo exactly as it is when starting the experiment for reproducibility.
     """
     try:
         sh.git.commit('-a',
@@ -34,7 +34,7 @@ def init_experiment(config):
     if run_comment:
         run_name += '-{}'.format(run_comment)
     config['run_name'] = run_name
-    
+
     # create the needed run directory ifnexists
     log_dir = config.get('log_dir', 'runs')
     if not os.path.exists(log_dir):
@@ -45,10 +45,10 @@ def init_experiment(config):
     config['run_dir'] = run_dir
 
     writer = SummaryWriter(run_dir)
-    
+
     # commit if you can
     commit_hash = commit(config.get('title', '<No Title'), start_time)
-    
+
     # create text summary for logging config to tensorboard
     config['tag'] = 'Experiment Config: {} :: {}\n'.format(
         config.get('title', '<No Title>'), start_time)
@@ -81,9 +81,9 @@ def init_experiment(config):
         torch.manual_seed(rseed)
 
     writer.add_text(config['tag'], text, 0)
-    
+
     # save the config to run dir
     with open(os.path.join(config['run_dir'], 'config.json'), 'w') as f:
         json.dump(config, f, indent=2)
-        
+
     return writer, config
