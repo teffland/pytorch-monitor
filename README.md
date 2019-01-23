@@ -7,7 +7,7 @@ The goal of pytorch-monitor is to make setting up reproducible experiments and m
 To install, you'll need to install:
 
 1. [pytorch](http://pytorch.org/)
-2. [tensorflow](http://tensorflow.org/) (Currently it needs to be v1.6 for compatibility reasons)
+2. [tensorflow](http://tensorflow.org/) (Only used for tensorboard -- currently it needs to be v1.6 for compatibility reasons)
 3. pytorch-monitor
 
 ```bash
