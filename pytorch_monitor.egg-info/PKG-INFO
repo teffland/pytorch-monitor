@@ -1,0 +1,12 @@
+Metadata-Version: 1.2
+Name: pytorch-monitor
+Version: 0.14
+Summary: Monitor pytorch modules with minimal code.
+Home-page: UNKNOWN
+Author: Tom Effland
+Author-email: teffland@cs.columbia.edu
+License: MIT
+Description: UNKNOWN
+Keywords: pytorch,logging
+Platform: UNKNOWN
+Requires-Python: >=3

@@ -6,8 +6,8 @@ setup(
   description = 'Monitor pytorch modules with minimal code.',
   author = 'Tom Effland',
   author_email = 'teffland@cs.columbia.edu',
-  url = 'https://github.com/teffland/pytorch-monitor', # use the URL to the github repo
-  download_url = 'https://github.com/teffland/pytorch-monitor/archive/0.14.tar.gz',
+  #url = 'https://github.com/teffland/pytorch-monitor', # use the URL to the github repo
+  #download_url = 'https://github.com/teffland/pytorch-monitor/archive/0.14.tar.gz',
   keywords = ['pytorch', 'logging'], # arbitrary keywords
   classifiers = [],
   license='MIT',
