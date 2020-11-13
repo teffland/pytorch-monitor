@@ -14,7 +14,7 @@ setup(
   install_requires = [
     'sh',
     'tensorboardX',
-    'tensorflow==1.6'
+    'tensorflow==2.3.1'
   ],
   python_requires='>=3'
 )
